@@ -1,0 +1,25 @@
+---
+
+- name: common tasks...
+  hosts: all
+  sudo: yes
+  roles:
+    - { role: 'common', tags: ['common'] }
+
+- name: configure database servers...
+  hosts: database-servers
+  sudo: yes
+  roles:
+    - { role: 'mongodb', tags: ['mongodb'] }
+
+- name: configure nodejs app servers...
+  hosts: nodejs-servers
+  sudo: yes
+  roles:
+    - { role: 'nodejs', tags: ['nodejs'] }
+
+- name: configure web servers...
+  hosts: web-servers
+  sudo: yes
+  roles:
+    - { role: 'nginx', tags: ['nginx'] }

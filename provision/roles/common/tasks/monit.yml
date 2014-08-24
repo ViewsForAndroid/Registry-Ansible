@@ -1,0 +1,23 @@
+---
+
+- name: install/ensure monit
+  apt: >
+    pkg=monit state=installed
+    update_cache=yes cache_valid_time=3600
+
+- name: ensure directory /etc/monit/
+  file: path=/etc/monit/ state=directory owner=root group=root mode=0755
+
+- name: add /etc/monit/monitrc
+  template: >
+    src=etc-monit-monitrc.j2
+    dest=/etc/monit/monitrc
+    owner=root group=root mode=0644
+  notify:
+    - monit reload
+
+- name: ensure directory /etc/monit/conf.d
+  file: path=/etc/monit/conf.d state=directory owner=root group=root mode=0755
+
+- name: ensure monit is started
+  service: name=monit state=started enabled=yes

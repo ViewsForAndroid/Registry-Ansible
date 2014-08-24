@@ -1,0 +1,110 @@
+---
+
+# Commons variables to all hosts
+common:
+
+  # Basic info
+  serverLocale: "en_US.UTF-8"
+  timezone: "Etc/UTC"
+
+  # Name of the application, used in setting directories and a system
+  # level user that be the owner/group on application files
+  applicationName: "registry"
+
+  # Email address for sending important notifications
+  adminEmail: "viewsforandroid@aldoborrero.com"
+
+  packages:
+
+    # Packages that will be installed/ensured for sure
+    core:
+
+      # Generic tools
+      - "unattended-upgrades"
+      - "psmisc"
+      - "rsync"
+      - "zip"
+      - "unzip"
+      - "logrotate"
+      - "logwatch"
+      - "git-core"
+      - "supervisor"
+      - "sysstat"
+      - "vim-nox"
+      - "upstart"
+      - "python-pycurl"
+
+      # Network tools
+      - "ntp"
+      - "htop"
+      - "iftop"
+      - "curl"
+      - "wget"
+      - "rsyslog"
+      - "rsyslog-gnutls"
+      - "rsyslog-relp"
+      - "openssh-client"
+      - "openssh-server"
+      - "openssl"
+      - "nload"
+      - "vnstat"
+
+      # Security tools
+      - "apparmor"
+      - "auditd"
+      - "rkhunter"
+      - "ufw"
+
+    # Packages held from auto update
+    held:
+      - "linux-*"
+      - "nginx*"
+      - "nodejs*"
+      - "npm*"
+      - "redis*"
+
+  ntp:
+    servers:
+      - "server 0.europe.pool.ntp.org"
+      - "server 1.europe.pool.ntp.org"
+      - "server 2.europe.pool.ntp.org"
+      - "server 3.europe.pool.ntp.org"
+
+  openssh:
+    port: "22"
+    loginGracetime: "15"
+    permitRootLogin: "no"
+    maxAuthTries: "3"
+    rsaAuthentication: "yes"
+    pubkeyAuthentication: "yes"
+    authorizedKeysFile: "%h/.ssh/authorized_keys" # "/etc/ssh/authorized_keys/%u"
+    allowUsers: "registry"
+    clientAliveInterval: "300"
+    clientAliveCountMax: "3"
+    maxStartups: "3:50:10"
+    x11Forwarding: "yes"
+    x11DisplayOffset: "10"
+    printMotd: "no"
+    printLastLog: "yes"
+    tcpKeepAlive: "yes"
+
+  iptables: []
+
+  fail2ban:
+    bantime: "86400"
+    banaction: "iptables-multiport"
+    action: "%(action_mwl)s"
+
+    # An array of strings for IP addresses that should be whitelisted by fail2ban
+    whiteList: [] # Add whatever ips you want: [ip1, ip2, ...]
+
+    # What services you want enabled for fail2ban
+    ssh: { enabled: "true", maxretry: "3" }
+
+    sshddos: { enabled: "true" }
+
+  monit:
+    checkInterval: "30"
+    log: "/var/log/monit.log"
+    mailserver:
+      enable: true

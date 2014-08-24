@@ -1,0 +1,9 @@
+# Vagrant related files
+.vagrant/
+vagrant_ansible_inventory_default
+
+# Ansible
+host_vars/
+
+# OS X bullshit
+.DS_Store

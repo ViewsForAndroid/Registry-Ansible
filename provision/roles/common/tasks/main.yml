@@ -1,0 +1,13 @@
+---
+
+- include: locales.yml tags=common,common:locales
+- include: apt.yml tags=common:apt
+- include: core-packages.yml tags=common,common:core-packages
+- include: tunning.yml tags=common,common:tunning
+- include: ntp.yml tags=common,common:ntp
+- include: ssh.yml tags=common,common:ssh
+#- include: iptables.yml tags=common,common:iptables
+- include: ufw.yml tags=common,common:ufw
+- include: limits.yml tags=common,common:limits
+#- include: fail2ban.yml tags=common,common:fail2ban
+- include: monit.yml tags=common,common:monit

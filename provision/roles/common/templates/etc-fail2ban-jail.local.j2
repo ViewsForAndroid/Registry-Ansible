@@ -1,0 +1,14 @@
+[DEFAULT]
+ignoreip  = 127.0.0.1 {% for _ip in common.fail2ban.whiteList %}{{ _ip }}{% endfor %}
+
+bantime   = {{ common.fail2ban.bantime }}
+destemail = {{ common.adminEmail }}
+banaction = {{ common.fail2ban.banaction }}
+action    = {{ common.fail2ban.action }}
+
+[ssh]
+enabled   = {{ common.fail2ban.ssh.enabled }}
+maxretry  = {{ common.fail2ban.ssh.maxretry }}
+
+[ssh-ddos]
+enabled   = {{ common.fail2ban.sshddos.enabled }}

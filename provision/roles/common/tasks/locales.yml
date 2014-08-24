@@ -1,0 +1,7 @@
+---
+
+- name: reconfigure locales
+  shell: dpkg-reconfigure locales
+
+- name: update-locale utf8
+  shell: update-locale LANG={{ common.serverLocale }}

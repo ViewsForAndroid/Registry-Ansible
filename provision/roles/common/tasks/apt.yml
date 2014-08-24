@@ -1,0 +1,13 @@
+---
+
+- name: add /etc/apt/apt.conf.d/10periodic
+  copy: >
+    src=etc-apt-apt.conf.d-10periodic
+    dest=/etc/apt/apt.conf.d/10periodic
+    owner=root group=root mode=0644
+
+- name: add /etc/apt/apt.conf.d/50unattended-upgrades
+  template: >
+    src=etc-apt-apt.conf.d-50unattended-upgrades
+    dest=/etc/apt/apt.conf.d/50unattended-upgrades
+    owner=root group=root mode=0644

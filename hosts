@@ -1,0 +1,11 @@
+[web-servers]
+viewsforandroid.com
+
+[database-servers]
+viewsforandroid.com
+
+[nodejs-servers]
+viewsforandroid.com
+
+[all:vars]
+env="production"

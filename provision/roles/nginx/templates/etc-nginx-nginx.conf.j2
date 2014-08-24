@@ -1,0 +1,237 @@
+# -------------------------------------------------------------
+# {{ ansible_managed }}
+# -------------------------------------------------------------
+
+user                        {{ nginx.config.user }};
+pid                         {{ nginx.config.pid }};
+
+# This number should be, at maximum, the number of CPU cores on your system.
+# (nginx doesn't benefit from more than one worker per CPU).
+worker_processes            {{ nginx.config.worker_processes }};
+
+events {
+  # Determines how many clients will be served by each worker process.
+  # (Max clients = worker_connections * worker_processes)
+  # "Max clients" is also limited by the number of socket connections available on the system (~64k)
+  worker_connections        {{ nginx.config.events.worker_connections }};
+
+  # Essential for Linux, optmized to serve many clients with each thread.
+  use                       {{ nginx.config.events.use }};
+
+  # Accept as many connections as possible, after nginx gets notification about a new connection.
+  # May flood worker_connections, if that option is set too low.
+  multi_accept              {{ nginx.config.events.multi_accept }};
+}
+
+# Number of file descriptors used for Nginx. This is set in the OS with 'ulimit -n 200000'
+# or using /etc/security/limits.conf
+worker_rlimit_nofile        {{ nginx.config.worker_rlimit_nofile }};
+
+# Only log critical errors.
+error_log                   {{ nginx.config.error_log }};
+
+http {
+  # -----------------------------------------
+  # HttpCoreModule Section
+  # URL: http://wiki.nginx.org/HttpCoreModule
+  # -----------------------------------------
+
+  # Hide nginx version.
+  server_tokens             {{ nginx.config.http.server_tokens }};
+
+  # Auto explanatory
+  ignore_invalid_headers    {{ nginx.config.http.ignore_invalid_headers }};
+
+  # Enables following a chain of error_page directives.
+  recursive_error_pages     {{ nginx.config.http.recursive_error_pages }};
+
+  {% if env != 'development' %}
+  # Sendfile copies data between one File Descriptor and other from within the kernel.
+  # More efficient than read() + write(), since that requires transferring data to and from the user space.
+  sendfile                  {{ nginx.config.http.sendfile }};
+  {% endif %}
+
+  # tcp_nopush causes nginx to attempt to send its HTTP response head in one packet, instead of using partial frames.
+  # This is useful for prepending headers before calling sendfile, or for throughput optimization.
+  tcp_nopush                {{ nginx.config.http.tcp_nopush }};
+
+  # Don't buffer data-sends (disable Nagle algorithm). Good for sending frequent small bursts of data in real time.
+  tcp_nodelay               {{ nginx.config.http.tcp_nodelay }};
+
+  # The standard MIME map (http://en.wikipedia.org/wiki/Internet_media_type)
+  include                   mime.types;
+
+  # Assigns the default MIME-type to be used for files where the standard MIME map doesn't specify anything.
+  default_type              {{ nginx.config.http.default_type }};
+
+  # Number of requests a client can make over the keep-alive connection.
+  keepalive_requests        {{ nginx.config.http.keepalive_requests }};
+
+  # Timeout for keep-alive connections. Server will close connections after this time.
+  keepalive_timeout         {{ nginx.config.http.keepalive_timeout }};
+
+  # Disable keepalive for certain user agents.
+  # By default keepalive is disabled for MS Internet Explorer (older than 6.0 service pack 2) after POST requests, and for Safari.
+  # This is because both browsers have issues with handling POST requests with keepalives.
+  keepalive_disable         {{ nginx.config.http.keepalive_disable }};
+
+  # If the client stops reading data, free up the stale client connection after this much time.
+  send_timeout              {{ nginx.config.http.send_timeout }};
+
+  # Disable file resuming
+  max_ranges                {{ nginx.config.http.max_ranges }};
+
+  # The directive sets the cache activity on. This cache stores:
+  #   - Open file descriptors, information with their size and modification time
+  #   - Information about the existence of directories
+  #   - Error information when searches for a file - no file, do not have rights to read, etc
+  #
+  # Params:
+  #   - max - specifies the maximum number of entries in the cache. When the cache overflows, the least recently used(LRU) items will be removed
+  #   - inactive - specifies the time when the cached item is removed, if it has not been downloaded during that time
+  #
+  # Changing this settings can bring performance gains (don't forget to test it though!)
+  open_file_cache           {{ nginx.config.http.open_file_cache }};
+
+  # This specifies whether or not to cache errors when searching for a file. Yes plz!
+  open_file_cache_errors    {{ nginx.config.http.open_file_cache_errors }};
+
+  # If use more than the number, the file descriptor will remain open in the cache.
+  open_file_cache_min_uses  {{ nginx.config.http.open_file_cache_min_uses }};
+
+  # The directive specifies the time needed to check the validity of the information about the item in the cache.
+  open_file_cache_valid     {{ nginx.config.http.open_file_cache_valid }};
+
+  # Specifies how to compare time of file modification and time in request header "If-Modified-Since":
+  #   - before — file modification time should be less than time in "If-Modified-Since" request header.
+  if_modified_since         {{ nginx.config.http.if_modified_since }};
+
+  # This will make sure nginx closes stale client connections.
+  # Bad, lazy or abusive clients may try to open up many connections and keep them open to use up available sockets (DDoS).
+  reset_timedout_connection {{ nginx.config.http.reset_timedout_connection }};
+
+  # Sets the bucket size for the server names hash tables.
+  server_names_hash_bucket_size {{ nginx.config.http.server_names_hash_bucket_size }};
+
+  # ---------------------------------------------------------------
+  # HttpHeadersModule Section
+  # URL: http://nginx.org/en/docs/http/ngx_http_headers_module.html
+  # ---------------------------------------------------------------
+
+  # Enables clickjacking protection in modern browsers.
+  # See https://developer.mozilla.org/en/The_X-FRAME-OPTIONS_response_header
+  add_header                {{ nginx.config.http.add_header }};
+
+  # --------------------------------------------
+  # HttpCharsetModule Section
+  # URL: http://wiki.nginx.org/HttpCharsetModule
+  # --------------------------------------------
+
+  charset                   {{ nginx.config.http.charset }};
+  source_charset            {{ nginx.config.http.source_charset }};
+
+  # -----------------------------------------------
+  # HttpGzipStaticModule
+  # URL: http://wiki.nginx.org/HttpGzipStaticModule
+  # -----------------------------------------------
+
+  gzip_static               {{ nginx.config.http.gzip_static }};
+
+  # -----------------------------------------
+  # HttpGzipModule Section
+  # URL: http://wiki.nginx.org/HttpGzipModule
+  # -----------------------------------------
+
+  gzip                      {{ nginx.config.http.gzip }};
+  gzip_disable              {{ nginx.config.http.gzip_disable }};
+  gzip_http_version         {{ nginx.config.http.gzip_http_version }};
+
+  # Enables response header of "Vary: Accept-Encoding".
+  gzip_vary                 {{ nginx.config.http.gzip_vary }};
+
+  gzip_comp_level           {{ nginx.config.http.gzip_comp_level }};
+
+  # Sets the minimum length, in bytes, of the response that will be compressed.
+  gzip_min_length           {{ nginx.config.http.gzip_min_length }};
+
+  # Assigns the number and the size of the buffers into which to store the compressed response.
+  # If unset, the size of one buffer is equal to the size of page, depending on platform this either 4K or 8K.
+  #gzip_buffers             16 8k;
+
+  # Allows compressed responses for any request even from proxies.
+  gzip_proxied              {{ nginx.config.http.gzip_proxied }};
+
+  gzip_types                {{ nginx.config.http.gzip_types }};
+
+  # -----------------------------------------------------------
+  # HttpSslModule Section
+  # URL: http://nginx.org/en/docs/http/ngx_http_ssl_module.html
+  # -----------------------------------------------------------
+
+  # Use a SSL/TLS cache for SSL session resume.
+  # This needs to be here (in this context, for session resumption to work).
+  # More info: http://nginx.org/pipermail/nginx/2010-November/023736.html
+  ssl_session_cache         {{ nginx.config.http.ssl_session_cache }};
+  ssl_session_timeout       {{ nginx.config.http.ssl_session_timeout }};
+
+  # --------------------------------------------------------------
+  # HttpRealipModule Section
+  # URL: http://nginx.org/en/docs/http/ngx_http_realip_module.html
+  # --------------------------------------------------------------
+
+  #real_ip_header           X-Forwarded-For;
+  #set_real_ip_from         127.0.0.1/32;
+
+  # -------------------------------------------------------------
+  # HttpProxyModule Section
+  # URL: http://nginx.org/en/docs/http/ngx_http_proxy_module.html
+  # -------------------------------------------------------------
+
+  proxy_set_header          {{ nginx.config.http.proxy_set_header_one }};
+  proxy_set_header          {{ nginx.config.http.proxy_set_header_two }};
+  proxy_set_header          {{ nginx.config.http.proxy_set_header_three }};
+  proxy_hide_header         {{ nginx.config.http.proxy_hide_header_one }};
+  proxy_hide_header         {{ nginx.config.http.proxy_hide_header_two }};
+  proxy_buffers             {{ nginx.config.http.proxy_buffers }};
+  proxy_buffer_size         {{ nginx.config.http.proxy_buffer_size }};
+  proxy_temp_path           {{ nginx.config.http.proxy_temp_path }};
+  proxy_cache_path          {{ nginx.config.http.proxy_cache_path }};
+
+  # ------------------------------------------------------------------
+  # HttpLimitConnModule Section
+  # URL: http://nginx.org/en/docs/http/ngx_http_limit_conn_module.html
+  # ------------------------------------------------------------------
+
+  # Sets the shared memory zone and the maximum allowed number of connections for a given key value.
+  # When this limit is exceeded, the server will return the 503 (Service Temporarily Unavailable) error in reply to a request.
+  limit_conn_zone           {{ nginx.config.http.limit_conn_zone }};
+
+  # -----------------------------------------------------------------
+  # HttpLimitReqModule Section
+  # URL: http://nginx.org/en/docs/http/ngx_http_limit_req_module.html
+  # -----------------------------------------------------------------
+
+  # This directive used to limit the request processing rate per for requests coming from a single IP address.
+  limit_req_zone            {{ nginx.config.http.limit_req_zone }};
+
+  # ----------------------------------------
+  # HttpLogModule Section
+  # URL: http://wiki.nginx.org/HttpLogModule
+  # ----------------------------------------
+
+  # Buffer log writes to speed up IO, or disable them altogether
+  #access_log /var/log/nginx/access.log main buffer=16k;
+  access_log                {{ nginx.config.http.access_log }};
+
+  # Apache Style
+  log_format                main '$remote_addr $host $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $ssl_cipher $request_time';
+
+  # ---------------------------------------------
+  # ---------------------------------------------
+
+  # Include remaining confis
+  include /etc/nginx/conf.d/*;
+
+  # Include all virtualhosts
+  include /etc/nginx/sites-enabled/*;
+}

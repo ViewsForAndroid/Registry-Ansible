@@ -1,0 +1,16 @@
+---
+
+- name: add /etc/timezone
+  lineinfile: >
+    dest=/etc/timezone
+    regexp="^"
+    line='{{ common.timezone }}'
+    state=present
+  notify: timezone apply
+
+- name: copy our /etc/ntp.conf
+  copy: >
+    src=etc-ntp.conf
+    dest=/etc/ntp.conf
+    owner=root group=root mode=0644
+  notify: ntp restart

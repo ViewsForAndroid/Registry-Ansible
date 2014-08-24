@@ -1,0 +1,14 @@
+set daemon {{ common.monit.checkInterval }}
+
+set logfile {{ common.monit.log }}
+
+set httpd port 2812 and
+use address localhost
+allow localhost
+
+{% if common.monit.mailserver.enable %}
+set mailserver localhost
+set mail-format { from: {{ common.adminEmail }} }
+{% endif %}
+
+include /etc/monit/conf.d/*

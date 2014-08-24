@@ -1,0 +1,7 @@
+---
+
+- name: add /etc/security/limits.conf
+  copy: >
+    src=etc-security-limits.conf
+    dest=/etc/security/limits.conf
+    owner=root group=root mode=0644

@@ -1,0 +1,24 @@
+---
+
+- name: provision vagrant with defaults...
+  hosts: all
+  sudo: yes
+  vars:
+    user: "registry"
+    user_comment: "Registry"
+    # created with: openssl passwd -salt <salt> -1 <plaintext>
+    # password: registry
+    password: "$1$salt$ZIsgWld7cxXGNcz3F.lO8."
+
+  tasks:
+  - name: create/ensure admin system group
+    group: name=admin system=yes state=present
+
+  - name: create registry user
+    user: name={{ user }} comment={{ user_comment }} state=present groups=admin password={{ password }} shell=/bin/bash
+
+  - name: install ssh public key from current account
+    authorized_key: user={{ user }} key="{{ lookup('file', '../ssh-keys/registry_rsa.pub') }}"
+
+  - name: install sudoers file for admin accounts
+    lineinfile: "dest=/etc/sudoers.d/admins state=present create=yes regexp='^%admin' line='%admin ALL=(ALL:ALL) NOPASSWD: SETENV: ALL' owner=root group=root mode=0440"

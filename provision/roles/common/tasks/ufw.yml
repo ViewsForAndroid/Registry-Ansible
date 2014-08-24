@@ -1,0 +1,25 @@
+---
+
+#- name: reset ufw rules
+#  shell: ufw reset --force
+
+- name: activate logging
+  shell: ufw logging on
+
+- name: set logging level (low)
+  shell: ufw logging low
+
+- name: set default policy for incoming (deny)
+  shell: ufw default deny incoming
+
+- name: set default policy for outgoing (allow)
+  shell: ufw default allow outgoing
+
+- name: allow traffic for OpenSSH
+  shell: ufw allow OpenSSH
+
+- name: allow traffic for ntp
+  shell: ufw allow ntp
+
+#- name: enable ufw
+#  shell: ufw enable
